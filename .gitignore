@@ -1,0 +1,8 @@
+# Ambiente virtual do Python - NUNCA ENVIE ISSO!
+venv/
+
+# Caches do Python
+__pycache__/
+
+# Arquivos temporários (como os .xml que vimos)
+*.aux.xml
