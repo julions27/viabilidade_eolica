@@ -5,6 +5,7 @@ from shapely.geometry import Point
 import folium
 from folium.plugins import HeatMap
 from streamlit_folium import st_folium
+import branca
 
 st.set_page_config(layout="wide")
 st.title("Viabilidade de Usinas Eólicas - RN")
@@ -40,6 +41,14 @@ def buscar_melhores(lat, lon, gdf, n=5, raio_metros=10000):
         return gdf_filtrados.sort_values("indice_final", ascending=False)
 
     return gdf_filtrados.sort_values("indice_final", ascending=False).head(n)
+
+def cor_indice(indice):
+    if indice >= 8:
+        return 'green'
+    elif indice >= 6:
+        return 'blue'
+    else:
+        return 'red'
 
 st.sidebar.header("Filtros")
 indice_min = st.sidebar.slider(
@@ -81,6 +90,41 @@ with col1:
         lat, lon = st.session_state.ultimo_clique
         zoom = 12
 
+        legenda_mapa = """
+        {% macro html(this, kwargs) %}
+        <div style="
+            position: fixed;
+            bottom: 20px;
+            left: 10px;
+            padding: 12px;
+            font-size: 14px;
+            background-color: white;
+            z-index: 9999;
+            opacity: 0.7;
+            border: 2px solid grey;
+            border-radius: 5px;
+            color: black !important;
+        ">
+            <p style="margin: 0 0 6px 0;"><b>Legenda</b></p>
+            <p style="margin: 4px 0;">
+                <span style="color:green; font-size:16px;">&#9673;</span>
+                <span style="white-space: nowrap;"> Ótimo 𐤟 Índice ≥ 8</span>
+            </p>
+            <p style="margin: 4px 0;">
+                <span style="color:blue; font-size:16px;">&#9673;</span>
+                <span style="white-space: nowrap;"> Intermediário 𐤟 6 ≤ Índice < 8</span>
+            </p>
+            <p style="margin: 4px 0;">
+                <span style="color:red; font-size:16px;">&#9673;</span>
+                <span style="white-space: nowrap;"> Ruim 𐤟 Índice < 6</span>
+            </p>
+        </div>
+        {% endmacro %}
+        """
+
+        legenda = branca.element.MacroElement()
+        legenda._template = branca.element.Template(legenda_mapa)
+
         m2 = folium.Map(location=[lat, lon], zoom_start=zoom, tiles="CartoDB positron", key="mapa_atualizado")
         folium.GeoJson(
             gdf_rn,
@@ -91,6 +135,7 @@ with col1:
                 "fillOpacity": 0.3
             }
         ).add_to(m2)
+        m2.add_child(legenda)
 
         folium.Marker(
             location=[lat, lon],
@@ -102,7 +147,6 @@ with col1:
         resultados = resultados.sort_values(by='indice_final', ascending=False).reset_index(drop=True)
 
         heat_data = []
-        cores = ["red", "orange", "yellow", "green", "blue"]
         posicoes = ["Melhor localização", "Segunda melhor localização", "Terceira melhor localização",
                     "Quarta melhor localização", "Quinta melhor localização"]
 
@@ -120,7 +164,7 @@ with col1:
             folium.CircleMarker(
                 location=[row.geometry.y, row.geometry.x],
                 radius=7,
-                color=cores[i],
+                color=cor_indice(row.indice_final),
                 fill=True,
                 fill_opacity=0.8,
                 tooltip=tooltip_text
