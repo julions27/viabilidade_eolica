@@ -5,3 +5,8 @@ shapely
 folium
 streamlit-folium
 branca
+numpy
+Requests
+rasterio
+rasterstats
+tqdm
