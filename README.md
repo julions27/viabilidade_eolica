@@ -91,6 +91,13 @@ A aplicação exibe um mapa interativo com:
 * **Filtros Dinâmicos:** Slider para ajustar o "Índice mínimo".
 * **Busca por Proximidade:** Identificação dos 5 melhores pontos num raio de 10km do clique.
 
+### Interface antes do clique
+![Interface antes do clique](imgs/antes.png)
+### Interface depois do clique
+![Interface depois do clique](imgs/depois.png)
+### Interface após clique em local sem nenhum resultado
+![Interface após clique em local sem nenhum resultado](imgs/invalido.png)
+
 ### Análise via Notebook
 
 O método de busca permite extrair insights como:
